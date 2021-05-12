@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>ストップウォッチ</title>
+  <link rel="stylesheet" href="stopWatch.css">
+</head>
+<body>
+  <div id="container">
+    <div id="timer">00:00.000</div>
+    <div class="controls">
+      <div class="button" id="start">Start</div>
+      <div class="button" id="stop">Stop</div>
+      <div class="button" id="reset">Reset</div>
+    </div>
+  </div>
+  
+  <!-- Command Option ↓　でカーソルを下方向へ延長（Win Ctrl+Alt） -->
+
+  <section style="text-align: left;">
+    <h1>CSS</h1>
+    <pre>
+body {
+  background-color: #888;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  text-align: center;
+}
+
+#container {
+  width: 270px;
+  text-align: center;
+  margin: 20px auto;
+  padding: 15px;
+  background-color: #666;
+  color: #333
+}
+
+#timer {
+  height: 120px;
+  line-height: 120px;
+  margin-bottom: 15px;
+  background-color: #333;
+  color: #ddd;
+  font-size: 40px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between; 
+}
+
+.button {
+  width: 80px;
+  height: 45px;
+  line-height: 45px;
+  background-color: #333;
+  color: #ddd;
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+}
+
+.inactive {
+  opacity: 0.6;
+}
+
+/* 10 buttonタグはブラウザごとに独自のスタイルが設定されているので、divタブを使うのが良い。 */
+    </pre>
+
+    <h1>JS</h1>
+    <pre>
+"use strict";
+
+{
+  const timer = document.getElementById("timer");
+  const start = document.getElementById("start");
+  const stop = document.getElementById("stop");
+  const reset = document.getElementById("reset");
+
+  function setButtonStateInitial() {
+    start.classList.remove("inactive");
+    stop.classList.add("inactive");
+    reset.classList.add("inactive");
+  }
+  
+  function setButtonStateRunning() {
+    start.classList.add("inactive");
+    stop.classList.remove("inactive");
+    reset.classList.add("inactive");
+  }
+  
+  function setButtonStateStopped() {
+    start.classList.remove("inactive");
+    stop.classList.add("inactive");
+    reset.classList.remove("inactive");
+  }
+
+  setButtonStateInitial();
+
+  function count() {
+    // console.log(Date.now() - startTime);
+    const d = new Date(Date.now() - startTime + elapsedTime); // ☓ new Dateなし
+    const m = String(d.getMinutes()).padStart(2, "0"); // 正String　誤string
+    const s = String(d.getSeconds()).padStart(2, "0"); // padStart(桁数, 満たなければ先頭に文字列を)
+    const ms = String(d.getMilliseconds()).padStart(3, "0"); // ○ seconds  ☓ Seconds
+    timer.textContent = `${m}:${s}:${ms}`;
+
+    timeoutId = setTimeout(() => {
+      count();
+    }, 20);
+  }
+
+  let startTime;
+  let timeoutId;
+  let elapsedTime = 0;
+
+  start.addEventListener("click", () => {
+    if (start.classList.contains("inactive") === true) {
+      return;
+    }
+    
+    setButtonStateRunning();
+    startTime = Date.now();
+    count();
+  });
+  
+  stop.addEventListener("click", () => {
+    if (stop.classList.contains("inactive") === true) {
+      return;
+    }
+
+    setButtonStateStopped();
+    clearTimeout(timeoutId);
+    elapsedTime += Date.now() - startTime;
+  });
+  
+  reset.addEventListener("click", () => {
+    if (reset.classList.contains("inactive") === true) {
+      return;
+    }
+
+    setButtonStateInitial();
+    timer.textContent = "00:00.000";
+    elapsedTime = 0;
+  });
+}
+
+// 07 ボタンを連打すると時刻の記録機構が狂うので、.disabledプロパティでボタンを無効化しよう
+// 12 button を div に変更したことで.disabledプロパティが使えなくなる
+    </pre>
+  </section>
+  <script src="stopWatch.js"></script>
+</body>
+</html>
